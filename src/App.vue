@@ -12,7 +12,6 @@
                     </ul>
                 </div>
             </div>
-
             <div class="page" v-show="page == 0">
                 <div class="mainstyle article">
                     <h4>Общая информация</h4>
@@ -20,29 +19,19 @@
                     <p>Своевременное и качественное техническое обслуживание позволяет избежать аварийных ситуаций, продлить срок службы техники и снизить затраты на ее ремонт. Кроме того, регулярное техническое обслуживание повышает безопасность эксплуатации оборудования и снижает риск возникновения производственных травм. Также техническое обслуживание является одним из основных методов контроля технического состояния оборудования и его соответствия требованиям безопасности.</p>
                 </div>
             </div>
-
             <div class="page" v-show="page == 1">
                 <div class="add-string mainstyle">
                     <button class="btn btn-primary" @click="addNewRow()"><i class="icon icon-plus"></i>Добавить строку</button>
                 </div>
                 <div class="table-outer mainstyle">
                     <div class="table-control">
-                        <span @click="saveAllChanges()">Сохранить изменения</span><i class="icon icon-gear" @click="changeSettings(0)"></i>
-                        <div class="settings-window" v-show="showSettings == 1">
-                            <ul>
+                        <span class="save-all" @click="saveAllChanges()">Сохранить изменения</span><i class="icon icon-gear" @click="changeSettings(0)"></i>
+                        <div class="settings-window" v-show="showSettings > 0" ref="modalA">
+                            <ul v-show="showSettings == 1">
                                 <li @click="changeSettings(2)">Отображение столбцов <i class="icon icon-right"></i></li>
-                                <li @click="changeSettings(3)">Порядок столбцов <i class="icon icon-right"></i></li>
+                                <!-- <li @click="changeSettings(3)">Порядок столбцов <i class="icon icon-right"></i></li> -->
                             </ul>
-
-                            <div class="settings-inner-window" v-show="showSettingsRowsDisplay">
-                                <ul>
-                                    <li>123</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="settings-window" v-show="showSettings == 2">
-                            <ul>
+                            <ul v-show="showSettings == 2">
                                 <li @click="changeSettings(1)" class="justify-content-start"><i class="icon icon-left"></i>Отображение столбцов</li>
                                 <li class="justify-content-start" v-for="(item, index) in columns" :key="'set'+index">
                                     <input class="form-check-input" :checked="item.show" type="checkbox" :value="item.show" :id="'settings-show-' + index" @click="columns[index].show = !columns[index].show">
@@ -51,12 +40,16 @@
                             </ul>
                         </div>
                     </div>
-                    
                     <div class="table-responsive"  ref="mainTable">
                         <div class="table">
                             <thead ref="tablehead">
-                                <tr>
-                                    <th class="" v-for="(col, index) in columns" :style="'width: ' + col.width + 'px'" :key="'col'+index" v-show="col.show">{{ col.name }}<div class="resizer" @mousedown="startMove($event, index)"></div></th>
+                                <tr :class="{ondrag: draggableCol}">
+                                    <th v-for="(col, index) in columns" :style="'width: ' + col.width + 'px;' + ' order:' + col.index" :key="'col'+index" v-show="col.show">
+                                        <div class="th-inner" :data-index="col.index" @mousedown="moveColumn($event, col.index)">
+                                            {{ col.name }}
+                                        </div>
+                                        <div class="resizer" @mousedown="startMove($event, index)"></div>
+                                    </th>
                                 
                                 </tr>
                             </thead>
@@ -70,16 +63,16 @@
                             >
                                 <template #item="{ element, index }">
                                     <tr>
-                                        <td v-show="columns[0].show" :style="'width: ' + columns[0].width + 'px'" class="handle" :class="{dragged: dragIndex == 0}">
+                                        <td v-show="columns[0].show" :style="'width: ' + columns[0].width + 'px;' + 'order: ' + columns[0].index" class="handle" :class="{dragged: dragIndex == 0}">
                                             <label>{{ columns[0].name }}</label>
                                             <div><i class="icon icon-handle"></i> 
                                             <span>{{ index + 1}}</span></div>
                                         </td>
-                                        <td v-show="columns[1].show" :style="'width: ' + columns[1].width + 'px'" :class="{dragged: dragIndex == 1}">
+                                        <td v-show="columns[1].show" :style="'width: ' + columns[1].width + 'px;' + 'order: ' + columns[1].index" :class="{dragged: dragIndex == 1}">
                                             <label>{{ columns[1].name }}</label>
                                             <i class="icon icon-dots" @click="showModalWindow($event, index)"></i>
                                         </td>
-                                        <td v-show="columns[2].show" :style="'width: ' + columns[2].width + 'px'" :class="{dragged: dragIndex == 2}">
+                                        <td v-show="columns[2].show" :style="'width: ' + columns[2].width + 'px;' + 'order: ' + columns[2].index" :class="{dragged: dragIndex == 2}">
                                             <label>{{ columns[2].name }}</label>
                                             <vSelect
                                                 :options="getOptionsNames(nameOptions)"
@@ -92,15 +85,15 @@
                                                 <template #no-options>Не найдено</template>
                                             </vSelect>
                                         </td>
-                                        <td v-show="columns[3].show" :style="'width: ' + columns[3].width + 'px'" :class="{dragged: dragIndex == 3}">
+                                        <td v-show="columns[3].show" :style="'width: ' + columns[3].width + 'px;' + 'order: ' + columns[3].index" :class="{dragged: dragIndex == 3}">
                                             <label>{{ columns[3].name }}</label>
                                             <input type="text" class="form-control" v-model="element.price" />
                                         </td>
-                                        <td v-show="columns[4].show" :style="'width: ' + columns[4].width + 'px'" :class="{dragged: dragIndex == 4}">
+                                        <td v-show="columns[4].show" :style="'width: ' + columns[4].width + 'px;' + 'order: ' + columns[4].index" :class="{dragged: dragIndex == 4}">
                                             <label>{{ columns[4].name }}</label>
                                             <input type="text" class="form-control" v-model="element.count" />
                                         </td>
-                                        <td v-show="columns[5].show" :style="'width: ' + columns[5].width + 'px'" :class="{dragged: dragIndex == 5}">
+                                        <td v-show="columns[5].show" :style="'width: ' + columns[5].width + 'px;' + 'order: ' + columns[5].index" :class="{dragged: dragIndex == 5}">
                                             <label>{{ columns[5].name }}</label>
                                             <vSelect
                                                 :options="getOptionsNames(productOptions)"
@@ -112,9 +105,8 @@
                                             >
                                                 <template #no-options>Не найдено</template>
                                             </vSelect>
-
                                         </td>
-                                        <td v-show="columns[6].show" :style="'width: ' + columns[6].width + 'px'" :class="{dragged: dragIndex == 6}">
+                                        <td v-show="columns[6].show" :style="'width: ' + columns[6].width + 'px;' + 'order: ' + columns[6].index" :class="{dragged: dragIndex == 6}">
                                             <label>{{ columns[6].name }}</label>
                                             {{ element.count * element.price }}
                                         </td>
@@ -123,10 +115,6 @@
                             </draggable>
                         </div>
                     </div>
-
-                    
-                                        
-                    
                     <div class="total">
                         <div class="total-block">
                             <div class="total-row">
@@ -151,14 +139,13 @@
                     </div>
                 </div>
             </div>
-
             <div class="page" v-show="page == 2">
                 <div class="mainstyle article">
                     <p>Дополнительных расходов нет</p>
                 </div>
             </div>
         </div>
-        <div class="modalWindow" v-if="modalDelete.show" :style="'left: ' + modalDelete.posx + 'px; top: ' + modalDelete.posy + 'px;'">
+        <div class="modalWindow" v-show="modalDelete.show" :style="'left: ' + modalDelete.posx + 'px; top: ' + modalDelete.posy + 'px;'" ref="modalDeleteWindow">
             <span @click="deleteRow(modalDelete.index)">Удалить</span>
         </div>
     </div>
@@ -178,8 +165,6 @@ export default {
         return {
             page: 1,
             showSettings: 0,
-            showSettingsRowsDisplay: false,
-            showSettingsRowsOrder: false,
             tableData: [
                 {
                     name: "1 Мраморный щебень фр. 2-5 мм, 25кг",
@@ -256,44 +241,57 @@ export default {
                     width: 60,
                     min: 55,
                     show: true,
-                    id: 0
+                    id: 0,
+                    index: 0,
                 },{
                     name: "Действие",
                     width: 30,
                     min: 30,
                     show: true,
-                    id: 1
+                    id: 1,
+                    index: 1,
                 },{
                     name: "Наименование единицы",
                     width: 600,
-                    min: 50,
+                    min: 60,
                     show: true,
-                    id: 2
+                    id: 2,
+                    index: 2,
                 },{
                     name: "Цена",
                     width: 200,
+                    min: 60,
                     show: true,
-                    id: 3
+                    id: 3,
+                    index: 3,
                 },{
                     name: "Кол-во",
                     width: 200,
+                    min: 60,
                     show: true,
-                    id: 4
+                    id: 4,
+                    index: 4,
                 },{
                     name: "Название товара",
                     width: 160,
+                    min: 60,
                     show: true,
-                    id: 5
+                    id: 5,
+                    index: 5,
                 },{
                     name: "Итого",
                     width: 160,
+                    min: 40,
                     show: true,
-                    id: 6
+                    id: 6,
+                    index: 6,
                 },
 
             ],
-            draggable: false,
+            draggableRow: false,
+            draggableCol: false,
             dragIndex: -1,
+            dragColIndex: -1,
             startOffset: 0,
             selectedCol: null,
             onInput: false,
@@ -369,7 +367,6 @@ export default {
                 return
             }
             this.showSettings = index;
-
         },
         addNewRow() {
             var newElement = {
@@ -382,13 +379,15 @@ export default {
             this.sendDataToBackend(newElement, 'addNewRow')
         },
         move(e) {
-            if (this.draggable) {
+            if (this.draggableRow) {
                 let newWidth = this.startOffset + e.pageX;
                 let minWidth = this.columns[this.selectedCol].min;
+                
                 if (!minWidth) {
                     minWidth = 0
                 }
                 if (newWidth <= minWidth) {
+                    
                     newWidth = minWidth;
                 }
                 let colObj = this.columns[this.selectedCol];
@@ -396,18 +395,58 @@ export default {
                 this.columns[this.selectedCol] = colObj;
                 
             }
+            if (this.draggableCol) {
+                if (e.target.className === "th-inner") {
+                    var targetElement = e.target;
+                    var targetIndex = parseInt(targetElement.dataset.index);
+                    var oldIndex = this.dragColIndex;
+                    var newIndex = targetIndex;
+
+                    if (targetIndex == this.dragColIndex) {
+                        return
+                    }
+                    var mouseX = e.clientX;
+                    var elementWidth = targetElement.clientWidth;
+                    var targetCoords = targetElement.getBoundingClientRect();
+                    var pixels = Math.abs(mouseX - (targetCoords.x + elementWidth / 2))
+                    if (pixels <= 5) {
+                        var jj = this.columns.find(item => item.index == oldIndex);
+                        var ee = this.columns.find(item => item.index == newIndex);
+                        jj.index = newIndex;
+                        ee.index = oldIndex;
+                        this.draggableCol = false;
+                        this.dragColIndex = -1;
+                    }
+                }
+            }
         },
-        startMove(e, ind) {
-            this.draggable = true;
-            this.dragIndex = ind;
-            this.startOffset = this.columns[ind].width - e.pageX;
-            this.selectedCol = ind;
-            this.$refs.tablehead.classList.add('unselectable')
+        startMove(e, index) {
+            this.draggableRow = true;
+            this.dragIndex = index;
+            this.startOffset = this.columns[index].width - e.pageX;
+            this.selectedCol = index;
         },
-        stopMove() {
-            this.draggable = false;
-            this.dragIndex = -1;
-            this.$refs.tablehead.classList.remove('unselectable')
+        stopMove(e) {
+            if (this.draggableRow) {
+                this.draggableRow = false;
+                this.dragIndex = -1;
+            }
+            if (this.draggableCol) {
+                this.draggableCol = false;
+                this.dragColIndex = -1;
+            }
+            if (!this.$refs.modalDeleteWindow.contains(e.target)) {
+                this.modalDelete.show = false;
+                this.modalDelete.index = -1;
+            }
+            if (!this.$refs.modalA.contains(e.target)) {
+                this.showSettings = 0;
+            }
+        },
+        moveColumn(e, i) {
+            e
+            this.dragColIndex = i;
+            this.draggableCol = true;
         },
         scrollElement(e) {
             if (window.screen.width < 425) {
@@ -440,8 +479,8 @@ export default {
             }
             this.modalDelete.show = true;
             this.modalDelete.index = i;
-            this.modalDelete.posx = e.clientX - 15;
-            this.modalDelete.posy = e.clientY + 15;
+            this.modalDelete.posx = e.target.getBoundingClientRect().left - 5;
+            this.modalDelete.posy = e.target.getBoundingClientRect().top + 20;
         },
         deleteRow() {
             this.sendDataToBackend(this.tableData[this.modalDelete.index], 'deleteRow')

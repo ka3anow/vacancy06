@@ -150,7 +150,7 @@ body {
     box-shadow: var(--shadow);
     top: 30px;
     right: 20px;
-    z-index: 2;
+    z-index: 99;
     border-radius: 5px;
 }
 .table-outer .table-control .settings-window ul {
@@ -180,23 +180,36 @@ body {
 }
 .table tr {
     display: flex;
+    user-select: none;
+    overflow: hidden;
+    flex-direction: row;
 }
 .table th {
     border-right: 1px solid var(--pale-grey);
-    padding: 14px 10px;
+    padding: 0;
     font-size: 16px;
     line-height: 1;
     position: relative;
-    overflow: hidden;
+    overflow: show;
     text-wrap: nowrap;
+}
+.table .th-inner {
+    padding: 14px 10px;
+    width: calc(100% - 6px);
+    margin-left: 2px;
+    overflow: hidden;
+}
+.table .ondrag {
+    cursor: move;
 }
 .table th .resizer {
     height: 100%;
     position: absolute;
     right: -3px;
     top: 0;
-    width: 6px;
+    width: 7px;
     cursor: col-resize;
+    z-index: 2;
 }
 .table td {
     border-bottom: 0;
@@ -385,7 +398,9 @@ body {
 .modalWindow span:hover {
     cursor:pointer;
 }
-
+.save-all:hover {
+    cursor: pointer;
+}
 @media (max-width: 768px) {
     .left-bar {
         width: 0;
