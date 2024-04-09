@@ -45,12 +45,11 @@
                             <thead ref="tablehead">
                                 <tr :class="{ondrag: draggableCol}">
                                     <th v-for="(col, index) in columns" :style="'width: ' + col.width + 'px;' + ' order:' + col.index" :key="'col'+index" v-show="col.show">
-                                        <div class="th-inner" :data-index="col.index" @mousedown="moveColumn($event, col.index)">
+                                        <div class="th-inner" :data-index="col.index" @mousedown="moveColumn(col.index)">
                                             {{ col.name }}
                                         </div>
                                         <div class="resizer" @mousedown="startMove($event, index)"></div>
                                     </th>
-                                
                                 </tr>
                             </thead>
                             <draggable
@@ -167,7 +166,7 @@ export default {
             showSettings: 0,
             tableData: [
                 {
-                    name: "1 Мраморный щебень фр. 2-5 мм, 25кг",
+                    name: "Мраморный щебень фр. 2-5 мм, 25кг",
                     id: 0,
                     price: 123,
                     count: 11,
@@ -175,7 +174,7 @@ export default {
                     productname: "Мраморный щебень",
                 },
                 {
-                    name: "2 Мраморный щебень фр. 2-5 мм, 25кг",
+                    name: "Мраморный щебень фр. 2-5 мм, 25кг",
                     id: 1,
                     price: 234,
                     count: 12,
@@ -183,7 +182,7 @@ export default {
                     productname: "Мраморный щебень",
                 },
                 {
-                    name: "3 Мраморный щебень фр. 2-5 мм, 25кг",
+                    name: "Мраморный щебень фр. 2-5 мм, 25кг",
                     id: 2,
                     price: 567,
                     count: 13,
@@ -191,7 +190,7 @@ export default {
                     productname: "Мраморный щебень",
                 },
                 {
-                    name: "4 Мраморный щебень фр. 2-5 мм, 25кг",
+                    name: "Мраморный щебень фр. 2-5 мм, 25кг",
                     id: 3,
                     price: 89,
                     count: 14,
@@ -199,7 +198,7 @@ export default {
                     productname: "Мраморный щебень",
                 },
                 {
-                    name: "5 Мраморный щебень фр. 2-5 мм, 25кг (белый)",
+                    name: "Мраморный щебень фр. 2-5 мм, 25кг (белый)",
                     id: 4,
                     price: 99,
                     count: 15,
@@ -273,7 +272,7 @@ export default {
                     index: 4,
                 },{
                     name: "Название товара",
-                    width: 160,
+                    width: 360,
                     min: 60,
                     show: true,
                     id: 5,
@@ -302,7 +301,6 @@ export default {
                 posy: 15,
                 index: -1,
             },
-
             headers: ["id", "name", "sport"],
             list: [
                 { id: 1, name: "Abby", sport: "basket" },
@@ -310,8 +308,8 @@ export default {
                 { id: 3, name: "Courtenay", sport: "volley" },
                 { id: 4, name: "David", sport: "rugby" }
             ],
-            }
-        },
+        }
+    },
     computed: {
         total() {
             var result = 0;
@@ -348,9 +346,6 @@ export default {
                 newArr.push(element.name)
             });
             return newArr;
-        },
-        checkMove: function(e) {
-            console.log("Future index: " + e.draggedContext.futureIndex);
         },
         changePage(index) {
             if (index != this.page) {
@@ -443,8 +438,7 @@ export default {
                 this.showSettings = 0;
             }
         },
-        moveColumn(e, i) {
-            e
+        moveColumn(i) {
             this.dragColIndex = i;
             this.draggableCol = true;
         },
